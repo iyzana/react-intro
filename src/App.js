@@ -1,31 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
 function App() {
+  const time = useTime();
+  const [name, setName] = useState('');
+
+  const handleNameInput = e => {
+    const formattedName = e.target.value
+      .toLowerCase()
+      .replace(/[_\s]/, '-')
+      .replace(/[^a-z-]/, '')
+      .replace(/(.*?)-{2,}(.*)/g, (_, p1, p2) => `${p1}-${p2}`)
+      .replace(/^-/, '');
+    setName(formattedName);
+  };
+
   return (
     <div className="App">
       <header className="App-header">
-        <Hi name="you" />
+        <Hi name="Sefa" />
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <p>{time.toLocaleTimeString()}</p>
+        Access Code
+        <input value={name} className="App-input" onChange={handleNameInput} />
       </header>
     </div>
   );
 }
 
-function Hi(props) {
-  return <h3>&lt;3 {props.name}</h3>;
+function Hi({ name }) {
+  return <h3>I &lt;3 {name}</h3>;
+}
+
+function useTime() {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    setTimeout(() => setTime(new Date()), 40);
+  });
+
+  return time;
 }
 
 export default App;
