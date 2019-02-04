@@ -1,46 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 function App() {
-  const time = useTime();
-  const [name, setName] = useState('');
+  const [owner, setOwner] = useState('florauml');
+  const [repo, setRepo] = useState('florauml');
+  const [contributors, setContributors] = useState();
 
-  const handleNameInput = e => {
-    const formattedName = e.target.value
-      .toLowerCase()
-      .replace(/[_\s]/, '-')
-      .replace(/[^a-z-]/, '')
-      .replace(/(.*?)-{2,}(.*)/g, (_, p1, p2) => `${p1}-${p2}`)
-      .replace(/^-/, '');
-    setName(formattedName);
-  };
+  useEffect(() => {
+    getContributors(owner, repo).then(setContributors);
+  }, []);
+
+  if (!contributors) {
+    return 'fetching...';
+  }
+
+  console.log(contributors);
 
   return (
     <div className="App">
-      <header className="App-header">
-        <Hi name="Sefa" />
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>{time.toLocaleTimeString()}</p>
-        Access Code
-        <input value={name} className="App-input" onChange={handleNameInput} />
-      </header>
+      <input onChange={setOwner} value={owner}/>
+      <ul>
+        {contributors.map(contributor => (
+          <li key="{contributor.id}">{contributor.login}</li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-function Hi({ name }) {
-  return <h3>I &lt;3 {name}</h3>;
+function getContributors(owner, repo) {
+  return githubApi(`repos/${owner}/${repo}/contributors`);
 }
 
-function useTime() {
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    setTimeout(() => setTime(new Date()), 40);
-  });
-
-  return time;
+function githubApi(path) {
+  return fetch(`https://api.github.com/${path}`, {
+    headers: {
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'succcubbus',
+    },
+  }).then(response => response.json())
+    .catch(console.error);
 }
 
 export default App;
